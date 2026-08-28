@@ -1,1 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>La Luna Staff DTR</title>
+<style>
+  :root{
+    --bg:#F3F4F6;
+    --surface:#FFFFFF;
+    --ink:#1D1D1F;
+    --sub:#6E6E73;
+    --line:#E5E6EA;
 
+    --jhay:#0A5FD6;
+    --jhay-dark:#083E8C;
+    --jhay-tint:#EAF2FE;
+    --jhay-ring:#0A5FD6;
+
+    --bong:#0E8F6B;
+    --bong-dark:#065C46;
+    --bong-tint:#E7F7F1;
+    --bong-ring:#0E8F6B;
+
+    --danger:#E1261C;
+    --ok:#34A853;
+    --amber:#B7791F;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .mono{font-family:"SF Mono","Roboto Mono",ui-monospace,Menlo,Consolas,monospace; font-variant-numeric:tabular-nums;}
+  #app{max-width:900px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(243,244,246,0.86);backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 16px 10px;}
+  .brand{display:flex;align-items:center;justify-content:space-between;}
+  .brand-left{display:flex;align-items:center;gap:10px;}
+  .logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--jhay) 0%,var(--bong) 100%);
+    display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+  .brand-title{font-size:17px;font-weight:700;letter-spacing:-0.01em;line-height:1.1;}
+  .brand-sub{font-size:11px;color:var(--sub);font-weight:500;}
+  .clock{text-align:right;}
+  .clock-time{font-size:18px;font-weight:700;letter-spacing:-0.02em;}
+  .clock-date{font-size:11px;color:var(--sub);}
+  .sync-pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;color:var(--sub);margin-top:2px;}
+  .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);}
+  .dot.off{background:#C7C7CC;}
+
+  main{flex:1;padding:14px 12px 90px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  @media (max-width:380px){ .grid{gap:7px;} }
+
+  .card{background:var(--surface);border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 6px 20px rgba(0,0,0,0.05);
+    display:flex;flex-direction:column;border:1px solid rgba(0,0,0,0.03);}
+
+  .emp-header{padding:14px 12px 12px;color:#fff;position:relative;}
+  .card.jhay .emp-header{background:linear-gradient(160deg,var(--jhay) 0%, var(--jhay-dark) 100%);}
+  .card.bong .emp-header{background:linear-gradient(160deg,var(--bong) 0%, var(--bong-dark) 100%);}
+  .emp-name{font-size:17px;font-weight:800;letter-spacing:-0.01em;}
+  .emp-role{font-size:10.5px;opacity:0.85;font-weight:500;margin-top:1px;}
+  .status-pill{display:inline-block;margin-top:8px;padding:4px 9px;border-radius:100px;font-size:10.5px;font-weight:700;
+    background:rgba(255,255,255,0.22);letter-spacing:0.01em;}
+
+  .body{padding:11px 10px 12px;display:flex;flex-direction:column;gap:8px;}
+
+  .shift-row{display:flex;gap:6px;}
+  .shift-btn{flex:1;border:none;border-radius:13px;padding:10px 6px;font-size:12.5px;font-weight:700;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:1px;transition:transform .08s ease, opacity .15s;}
+  .shift-btn:active{transform:scale(0.96);}
+  .shift-btn[disabled]{opacity:0.38;cursor:not-allowed;}
+  .card.jhay .shift-in{background:var(--jhay-tint);color:var(--jhay-dark);}
+  .card.bong .shift-in{background:var(--bong-tint);color:var(--bong-dark);}
+  .shift-out{background:#FDECEC;color:var(--danger);}
+  .shift-time{font-size:9.5px;font-weight:600;opacity:0.75;}
+
+  .worked-box{background:var(--bg);border-radius:13px;padding:8px 10px;display:flex;justify-content:space-between;align-items:center;}
+  .worked-label{font-size:10.5px;color:var(--sub);font-weight:600;}
+  .worked-val{font-size:15px;font-weight:800;}
+
+  .breaks{display:flex;flex-direction:column;gap:6px;}
+  .brk{border:1px solid var(--line);border-radius:14px;padding:8px 9px;display:flex;align-items:center;gap:8px;}
+  .brk.active{border-color:transparent;}
+  .card.jhay .brk.active{background:var(--jhay-tint);}
+  .card.bong .brk.active{background:var(--bong-tint);}
+  .brk.over{background:#FDECEC;}
+
+  .ring-wrap{position:relative;width:42px;height:42px;flex-shrink:0;}
+  .ring-wrap svg{transform:rotate(-90deg);}
+  .ring-bg{fill:none;stroke:var(--line);stroke-width:4;}
+  .ring-fg{fill:none;stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .3s linear;}
+  .card.jhay .ring-fg{stroke:var(--jhay-ring);}
+  .card.bong .ring-fg{stroke:var(--bong-ring);}
+  .ring-fg.over{stroke:var(--danger);}
+  .ring-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;}
+
+  .brk-info{flex:1;min-width:0;}
+  .brk-name{font-size:11.5px;font-weight:700;}
+  .brk-limit{font-size:9.5px;color:var(--sub);font-weight:600;}
+  .brk-timer{font-size:14px;font-weight:800;margin-top:1px;}
+  .brk-timer.over{color:var(--danger);font-weight:900;}
+  .over-tag{display:inline-block;font-size:8.5px;font-weight:800;color:#fff;background:var(--danger);
+    padding:1px 5px;border-radius:100px;margin-left:5px;vertical-align:1px;letter-spacing:0.02em;}
+  .done-tag{display:inline-block;font-size:8.5px;font-weight:700;color:var(--ok);margin-left:4px;}
+
+  .brk-actions{display:flex;flex-direction:column;gap:4px;}
+  .brk-btn{border:none;border-radius:9px;padding:5px 8px;font-size:9.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .brk-btn:active{transform:scale(0.94);}
+  .brk-btn[disabled]{opacity:0.3;cursor:not-allowed;}
+  .card.jhay .brk-btn.start{background:var(--jhay);color:#fff;}
+  .card.bong .brk-btn.start{background:var(--bong);color:#fff;}
+  .brk-btn.pause{background:#FFF1DC;color:var(--amber);}
+  .brk-btn.end{background:#F1F1F3;color:var(--sub);}
+
+  /* Admin bar */
+  .admin-bar{position:fixed;bottom:0;left:0;right:0;z-index:20;background:rgba(255,255,255,0.9);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);
+    padding:9px 14px calc(9px + env(safe-area-inset-bottom));display:flex;justify-content:center;}
+  #app.wide .admin-bar{max-width:900px;margin:0 auto;left:0;right:0;}
+  .admin-btn{border:none;background:var(--ink);color:#fff;font-size:12.5px;font-weight:700;
+    padding:9px 20px;border-radius:100px;cursor:pointer;display:flex;align-items:center;gap:6px;}
+  .admin-btn:active{transform:scale(0.97);}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:50;display:flex;align-items:flex-end;
+    justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .overlay.show{opacity:1;pointer-events:auto;}
+  .sheet{background:var(--surface);width:100%;max-width:520px;border-radius:22px 22px 0 0;padding:20px 20px calc(20px + env(safe-area-inset-bottom));
+    transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);max-height:82vh;overflow-y:auto;}
+  .overlay.show .sheet{transform:translateY(0);}
+  .sheet-handle{width:36px;height:4px;background:var(--line);border-radius:100px;margin:0 auto 14px;}
+  .sheet h2{font-size:17px;margin:0 0 3px;letter-spacing:-0.01em;}
+  .sheet p.hint{font-size:12.5px;color:var(--sub);margin:0 0 16px;}
+  .pin-dots{display:flex;gap:12px;justify-content:center;margin:18px 0;}
+  .pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid var(--line);}
+  .pin-dot.filled{background:var(--ink);border-color:var(--ink);}
+  .pin-error{color:var(--danger);font-size:12px;text-align:center;font-weight:600;height:16px;}
+  .keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:280px;margin:6px auto 0;}
+  .key{aspect-ratio:1;border:none;border-radius:50%;background:var(--bg);font-size:20px;font-weight:600;cursor:pointer;}
+  .key:active{background:var(--line);}
+  .key.func{background:none;font-size:13px;font-weight:700;color:var(--sub);}
+
+  .admin-panel h3{font-size:13px;margin:16px 0 6px;color:var(--sub);text-transform:uppercase;letter-spacing:0.03em;}
+  select,input[type=date]{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+    font-size:14px;background:var(--bg);font-family:inherit;}
+  .export-btn{width:100%;padding:13px;border:none;border-radius:14px;background:var(--ink);color:#fff;
+    font-size:14.5px;font-weight:700;cursor:pointer;margin-top:6px;}
+  table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;}
+  th,td{text-align:left;padding:6px 5px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  th{color:var(--sub);font-weight:700;font-size:9.5px;text-transform:uppercase;}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .lock-btn{background:none;border:none;color:var(--danger);font-size:12.5px;font-weight:700;cursor:pointer;
+    padding:8px 0;width:100%;text-align:center;}
+  .close-x{position:absolute;top:16px;right:16px;background:var(--bg);border:none;width:30px;height:30px;
+    border-radius:50%;font-size:15px;color:var(--sub);cursor:pointer;}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="brand">
+      <div class="brand-left">
+        <div class="logo">🌙</div>
+        <div>
+          <div class="brand-title">La Luna Staff DTR</div>
+          <div class="brand-sub">Daily Time Record · Catarman, Camiguin</div>
+        </div>
+      </div>
+      <div class="clock">
+        <div class="clock-time mono" id="clockTime">--:--:--</div>
+        <div class="clock-date" id="clockDate">-</div>
+        <div class="sync-pill"><span class="dot" id="syncDot"></span><span id="syncText">syncing…</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid" id="grid"></div>
+  </main>
+
+  <div class="admin-bar">
+    <button class="admin-btn" id="openAdmin">🔒 Admin · Export Log</button>
+  </div>
+</div>
+
+<!-- PIN sheet -->
+<div class="overlay" id="pinOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <button class="close-x" id="closePin">✕</button>
+    <h2>Admin Access</h2>
+    <p class="hint">Enter the 6-digit admin PIN to export or view logs.</p>
+    <div class="pin-dots" id="pinDots"></div>
+    <div class="pin-error" id="pinError"></div>
+    <div class="keypad" id="keypad"></div>
+  </div>
+</div>
+
+<!-- Admin panel sheet -->
+<div class="overlay" id="adminOverlay">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <button class="close-x" id="closeAdminPanel">✕</button>
+    <h2>Admin Panel</h2>
+    <p class="hint">View records and export the attendance log as CSV.</p>
+    <div class="admin-panel">
+      <h3>Date</h3>
+      <select id="dateSelect"></select>
+      <button class="export-btn" id="downloadOne">⬇️ Download CSV — Selected Date</button>
+      <button class="export-btn" id="downloadAll" style="background:var(--jhay-dark);">⬇️ Download CSV — All Records</button>
+      <h3>Preview</h3>
+      <div class="table-scroll">
+        <table id="previewTable"></table>
+      </div>
+    </div>
+    <button class="lock-btn" id="lockAdmin">🔒 Lock Admin Access</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const ADMIN_PIN = "092484";
+  const EMP = [
+    {id:"Jhay", name:"Jhay", role:"Staff · Kitchen & Service", cls:"jhay"},
+    {id:"Bong", name:"Bong", role:"Staff · Kitchen & Service", cls:"bong"}
+  ];
+  const BREAKS = [
+    {key:"break1", label:"1st Break", limit:30*60},
+    {key:"break2", label:"2nd Break", limit:60*60},
+    {key:"break3", label:"3rd Break", limit:30*60}
+  ];
+
+  function todayKey(d){ d = d || new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function emptyDay(){
+    const day = {};
+    EMP.forEach(e=>{
+      day[e.id] = {
+        login:null, logout:null,
+        breaks:{
+          break1:{used:0, running:false, startedAt:null, ended:false, firstStart:null},
+          break2:{used:0, running:false, startedAt:null, ended:false, firstStart:null},
+          break3:{used:0, running:false, startedAt:null, ended:false, firstStart:null}
+        }
+      };
+    });
+    return day;
+  }
+
+  let state = { date: todayKey(), data: emptyDay() };
+  let dateIndex = [];
+  let saving = false;
+  let dirty = false;
+
+  async function loadDay(dateStr){
+    try{
+      const res = await window.storage.get("dtr:"+dateStr, true);
+      return res && res.value ? JSON.parse(res.value) : emptyDay();
+    }catch(e){ return emptyDay(); }
+  }
+  async function saveDay(dateStr, data){
+    try{
+      await window.storage.set("dtr:"+dateStr, JSON.stringify(data), true);
+      return true;
+    }catch(e){ return false; }
+  }
+  async function loadIndex(){
+    try{
+      const res = await window.storage.get("dtr:index", true);
+      return res && res.value ? JSON.parse(res.value) : [];
+    }catch(e){ return []; }
+  }
+  async function saveIndex(idx){
+    try{ await window.storage.set("dtr:index", JSON.stringify(idx), true); }catch(e){}
+  }
+  async function ensureIndexed(dateStr){
+    if(!dateIndex.includes(dateStr)){
+      dateIndex.push(dateStr);
+      dateIndex.sort().reverse();
+      await saveIndex(dateIndex);
+      populateDateSelect();
+    }
+  }
+
+  function setSyncStatus(ok){
+    document.getElementById("syncDot").classList.toggle("off", !ok);
+    document.getElementById("syncText").textContent = ok ? "synced" : "offline";
+  }
+
+  async function persist(){
+    saving = true;
+    const ok = await saveDay(state.date, state.data);
+    setSyncStatus(ok);
+    await ensureIndexed(state.date);
+    saving = false;
+    if(dirty){ dirty = false; persist(); }
+  }
+  function queueSave(){
+    if(saving){ dirty = true; return; }
+    persist();
+  }
+
+  async function pollRemote(){
+    // don't clobber if a local action just fired mid-save
+    if(saving) return;
+    const remote = await loadDay(state.date);
+    state.data = remote;
+    render();
+  }
+
+  function fmtClock(sec){
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+    if(h>0) return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+    return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
+  function fmtTimeOfDay(iso){
+    if(!iso) return "—";
+    const d = new Date(iso);
+    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
+  }
+  function fmtHM(sec){
+    sec = Math.max(0, Math.round(sec));
+    const h = Math.floor(sec/3600), m = Math.round((sec%3600)/60);
+    return h+"h "+String(m).padStart(2,"0")+"m";
+  }
+
+  function breakElapsed(b, now){
+    let e = b.used;
+    if(b.running && b.startedAt) e += (now - new Date(b.startedAt).getTime())/1000;
+    return e;
+  }
+  function anyBreakRunning(emp){
+    return BREAKS.some(bd => emp.breaks[bd.key].running);
+  }
+  function totalBreakSeconds(emp, now){
+    return BREAKS.reduce((sum,bd)=> sum + breakElapsed(emp.breaks[bd.key], now), 0);
+  }
+  function workedSeconds(emp, now){
+    if(!emp.login) return 0;
+    const end = emp.logout ? new Date(emp.logout).getTime() : now;
+    const start = new Date(emp.login).getTime();
+    let raw = (end-start)/1000 - totalBreakSeconds(emp, now);
+    return Math.max(0, raw);
+  }
+
+  // ---------- Actions ----------
+  async function login(empId){
+    const emp = state.data[empId];
+    if(emp.login) return;
+    emp.login = new Date().toISOString();
+    render(); queueSave();
+  }
+  async function logout(empId){
+    const emp = state.data[empId];
+    if(!emp.login || emp.logout) return;
+    if(anyBreakRunning(emp)){
+      alert(empId+" is currently on a break. Please end the break before logging out.");
+      return;
+    }
+    emp.logout = new Date().toISOString();
+    render(); queueSave();
+  }
+  async function startBreak(empId, key){
+    const emp = state.data[empId];
+    if(!emp.login || emp.logout) return;
+    if(anyBreakRunning(emp)) return;
+    const b = emp.breaks[key];
+    if(b.ended) return;
+    b.running = true;
+    b.startedAt = new Date().toISOString();
+    if(!b.firstStart) b.firstStart = b.startedAt;
+    render(); queueSave();
+  }
+  async function pauseBreak(empId, key){
+    const emp = state.data[empId];
+    const b = emp.breaks[key];
+    if(!b.running) return;
+    b.used += (Date.now() - new Date(b.startedAt).getTime())/1000;
+    b.running = false;
+    b.startedAt = null;
+    render(); queueSave();
+  }
+  async function endBreak(empId, key){
+    const emp = state.data[empId];
+    const b = emp.breaks[key];
+    if(b.running){
+      b.used += (Date.now() - new Date(b.startedAt).getTime())/1000;
+      b.running = false;
+      b.startedAt = null;
+    }
+    b.ended = true;
+    render(); queueSave();
+  }
+
+  // ---------- Rendering ----------
+  function ringDash(fraction){
+    const r = 17, c = 2*Math.PI*r;
+    const f = Math.min(1, Math.max(0, fraction));
+    return {circumference:c, offset:c*(1-f)};
+  }
+
+  function render(){
+    const now = Date.now();
+    const grid = document.getElementById("grid");
+    grid.innerHTML = "";
+    EMP.forEach(e=>{
+      const emp = state.data[e.id];
+      const card = document.createElement("div");
+      card.className = "card "+e.cls;
+
+      let statusLabel = "Not clocked in";
+      if(emp.login && !emp.logout){
+        const runningBrk = BREAKS.find(bd=>emp.breaks[bd.key].running);
+        statusLabel = runningBrk ? "On "+runningBrk.label : "Working";
+      } else if(emp.logout){
+        statusLabel = "Shift complete";
+      }
+
+      const worked = workedSeconds(emp, now);
+
+      let breaksHtml = "";
+      BREAKS.forEach(bd=>{
+        const b = emp.breaks[bd.key];
+        const elapsed = breakElapsed(b, now);
+        const over = elapsed > bd.limit;
+        const frac = elapsed / bd.limit;
+        const dash = ringDash(frac);
+        const active = b.running;
+        const canStart = emp.login && !emp.logout && !anyBreakRunning(emp) && !b.ended;
+        const canPause = b.running;
+        const canEnd = b.running || (b.used > 0 && !b.ended);
+
+        breaksHtml += `
+        <div class="brk ${active?'active':''} ${over?'over':''}">
+          <div class="ring-wrap">
+            <svg width="42" height="42" viewBox="0 0 42 42">
+              <circle class="ring-bg" cx="21" cy="21" r="17"></circle>
+              <circle class="ring-fg ${over?'over':''}" cx="21" cy="21" r="17"
+                stroke-dasharray="${dash.circumference}" stroke-dashoffset="${dash.offset}"></circle>
+            </svg>
+            <div class="ring-icon">${b.ended? '✅' : (active? '⏱️':'☕')}</div>
+          </div>
+          <div class="brk-info">
+            <div class="brk-name">${bd.label} ${over? '<span class="over-tag">OVER</span>' : (b.ended? '<span class="done-tag">done</span>':'')}</div>
+            <div class="brk-limit">limit ${bd.limit/60}min</div>
+            <div class="brk-timer mono ${over?'over':''}">${fmtClock(elapsed)}</div>
+          </div>
+          <div class="brk-actions">
+            <button class="brk-btn start" data-act="start" data-emp="${e.id}" data-key="${bd.key}" ${canStart?'':'disabled'}>${b.used>0 && !active ? 'RESUME':'START'}</button>
+            <button class="brk-btn pause" data-act="pause" data-emp="${e.id}" data-key="${bd.key}" ${canPause?'':'disabled'}>PAUSE</button>
+            <button class="brk-btn end" data-act="end" data-emp="${e.id}" data-key="${bd.key}" ${canEnd?'':'disabled'}>END</button>
+          </div>
+        </div>`;
+      });
+
+      card.innerHTML = `
+        <div class="emp-header">
+          <div class="emp-name">${e.name}</div>
+          <div class="emp-role">${e.role}</div>
+          <div class="status-pill">${statusLabel}</div>
+        </div>
+        <div class="body">
+          <div class="shift-row">
+            <button class="shift-btn shift-in" data-act="login" data-emp="${e.id}" ${emp.login?'disabled':''}>
+              <span>LOGIN</span>
+              <span class="shift-time mono">${emp.login? fmtTimeOfDay(emp.login):'--:--'}</span>
+            </button>
+            <button class="shift-btn shift-out" data-act="logout" data-emp="${e.id}" ${(!emp.login||emp.logout)?'disabled':''}>
+              <span>LOGOUT</span>
+              <span class="shift-time mono">${emp.logout? fmtTimeOfDay(emp.logout):'--:--'}</span>
+            </button>
+          </div>
+          <div class="worked-box">
+            <div class="worked-label">Worked today (net of breaks)</div>
+            <div class="worked-val mono">${fmtHM(worked)}</div>
+          </div>
+          <div class="breaks">${breaksHtml}</div>
+        </div>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  document.getElementById("grid").addEventListener("click", (ev)=>{
+    const btn = ev.target.closest("button[data-act]");
+    if(!btn || btn.disabled) return;
+    const act = btn.dataset.act, empId = btn.dataset.emp, key = btn.dataset.key;
+    if(act==="login") login(empId);
+    else if(act==="logout") logout(empId);
+    else if(act==="start") startBreak(empId, key);
+    else if(act==="pause") pauseBreak(empId, key);
+    else if(act==="end") endBreak(empId, key);
+  });
+
+  // ---------- Clock ticking ----------
+  function tickClock(){
+    const now = new Date();
+    document.getElementById("clockTime").textContent = now.toLocaleTimeString([], {hour:"2-digit",minute:"2-digit",second:"2-digit"});
+    document.getElementById("clockDate").textContent = now.toLocaleDateString([], {weekday:"short", month:"short", day:"numeric"});
+    // roll over to new day
+    const k = todayKey(now);
+    if(k !== state.date){
+      state.date = k;
+      state.data = emptyDay();
+    }
+  }
+  setInterval(()=>{ tickClock(); render(); }, 1000);
+
+  // ---------- Remote sync ----------
+  setInterval(pollRemote, 3000);
+  window.addEventListener("online", ()=>{ setSyncStatus(true); pollRemote(); });
+  window.addEventListener("offline", ()=>{ setSyncStatus(false); });
+
+  // ---------- PIN + Admin ----------
+  let pinBuffer = "";
+  const pinOverlay = document.getElementById("pinOverlay");
+  const adminOverlay = document.getElementById("adminOverlay");
+
+  function openPin(){
+    pinBuffer = "";
+    document.getElementById("pinError").textContent = "";
+    renderPinDots();
+    pinOverlay.classList.add("show");
+  }
+  function closePin(){ pinOverlay.classList.remove("show"); }
+  function renderPinDots(){
+    const wrap = document.getElementById("pinDots");
+    wrap.innerHTML = "";
+    for(let i=0;i<6;i++){
+      const d = document.createElement("div");
+      d.className = "pin-dot"+(i<pinBuffer.length? " filled":"");
+      wrap.appendChild(d);
+    }
+  }
+  function buildKeypad(){
+    const keys = ["1","2","3","4","5","6","7","8","9","","0","⌫"];
+    const kp = document.getElementById("keypad");
+    kp.innerHTML = "";
+    keys.forEach(k=>{
+      const b = document.createElement("button");
+      if(k===""){ b.style.visibility="hidden"; b.className="key"; }
+      else if(k==="⌫"){ b.className="key func"; b.textContent="⌫"; }
+      else { b.className="key"; b.textContent=k; }
+      b.addEventListener("click", ()=>{
+        if(k==="⌫"){ pinBuffer = pinBuffer.slice(0,-1); }
+        else if(k!=="" ){ if(pinBuffer.length<6) pinBuffer += k; }
+        renderPinDots();
+        document.getElementById("pinError").textContent = "";
+        if(pinBuffer.length===6){
+          if(pinBuffer===ADMIN_PIN){
+            closePin();
+            openAdminPanel();
+          } else {
+            document.getElementById("pinError").textContent = "Incorrect PIN. Try again.";
+            setTimeout(()=>{ pinBuffer=""; renderPinDots(); }, 500);
+          }
+        }
+      });
+      kp.appendChild(b);
+    });
+  }
+  buildKeypad();
+
+  document.getElementById("openAdmin").addEventListener("click", openPin);
+  document.getElementById("closePin").addEventListener("click", closePin);
+
+  function populateDateSelect(){
+    const sel = document.getElementById("dateSelect");
+    const cur = sel.value;
+    sel.innerHTML = "";
+    const dates = dateIndex.includes(state.date) ? dateIndex.slice() : [state.date, ...dateIndex];
+    dates.forEach(d=>{
+      const opt = document.createElement("option");
+      opt.value = d; opt.textContent = d + (d===state.date? " (today)":"");
+      sel.appendChild(opt);
+    });
+    if(cur && dates.includes(cur)) sel.value = cur;
+  }
+
+  async function openAdminPanel(){
+    dateIndex = await loadIndex();
+    populateDateSelect();
+    await refreshPreview();
+    adminOverlay.classList.add("show");
+  }
+  document.getElementById("closeAdminPanel").addEventListener("click", ()=> adminOverlay.classList.remove("show"));
+  document.getElementById("lockAdmin").addEventListener("click", ()=> adminOverlay.classList.remove("show"));
+  document.getElementById("dateSelect").addEventListener("change", refreshPreview);
+
+  function csvRowsForDay(dateStr, dayData){
+    const rows = [];
+    EMP.forEach(e=>{
+      const emp = dayData[e.id];
+      const now = Date.now();
+      const row = {
+        Date: dateStr,
+        Employee: e.name,
+        Login: emp.login? fmtTimeOfDay(emp.login) : "",
+        Logout: emp.logout? fmtTimeOfDay(emp.logout) : "",
+      };
+      let totalBreakSec = 0;
+      BREAKS.forEach(bd=>{
+        const b = emp.breaks[bd.key];
+        const elapsed = breakElapsed(b, now);
+        totalBreakSec += elapsed;
+        row[bd.label+" Start"] = b.firstStart? fmtTimeOfDay(b.firstStart) : "";
+        row[bd.label+" Duration (min)"] = elapsed>0 ? Math.round(elapsed/60) : 0;
+        row[bd.label+" Status"] = elapsed>bd.limit ? "OVER BREAK" : (b.firstStart? "OK" : "—");
+      });
+      row["Total Break (min)"] = Math.round(totalBreakSec/60);
+      row["Total Worked Hours"] = emp.login ? fmtHM(workedSeconds(emp, now)) : "";
+      rows.push(row);
+    });
+    return rows;
+  }
+
+  async function refreshPreview(){
+    const dateStr = document.getElementById("dateSelect").value || state.date;
+    const dayData = dateStr===state.date ? state.data : await loadDay(dateStr);
+    const rows = csvRowsForDay(dateStr, dayData);
+    const table = document.getElementById("previewTable");
+    if(rows.length===0){ table.innerHTML = "<tr><td>No data</td></tr>"; return; }
+    const cols = Object.keys(rows[0]);
+    let html = "<tr>"+cols.map(c=>`<th>${c}</th>`).join("")+"</tr>";
+    rows.forEach(r=>{
+      html += "<tr>"+cols.map(c=>`<td>${r[c]}</td>`).join("")+"</tr>";
+    });
+    table.innerHTML = html;
+  }
+
+  function toCsv(rows){
+    if(rows.length===0) return "";
+    const cols = Object.keys(rows[0]);
+    const esc = v => `"${String(v).replace(/"/g,'""')}"`;
+    let out = cols.map(esc).join(",")+"\n";
+    rows.forEach(r=> out += cols.map(c=>esc(r[c])).join(",")+"\n");
+    return out;
+  }
+  function downloadCsv(content, filename){
+    const blob = new Blob([content], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById("downloadOne").addEventListener("click", async ()=>{
+    const dateStr = document.getElementById("dateSelect").value || state.date;
+    const dayData = dateStr===state.date ? state.data : await loadDay(dateStr);
+    const rows = csvRowsForDay(dateStr, dayData);
+    downloadCsv(toCsv(rows), `LaLuna-DTR-${dateStr}.csv`);
+  });
+  document.getElementById("downloadAll").addEventListener("click", async ()=>{
+    dateIndex = await loadIndex();
+    const dates = dateIndex.includes(state.date) ? dateIndex : [state.date, ...dateIndex];
+    let allRows = [];
+    for(const d of dates.slice().sort()){
+      const dayData = d===state.date ? state.data : await loadDay(d);
+      allRows = allRows.concat(csvRowsForDay(d, dayData));
+    }
+    downloadCsv(toCsv(allRows), `LaLuna-DTR-ALL.csv`);
+  });
+
+  // ---------- Init ----------
+  async function init(){
+    tickClock();
+    dateIndex = await loadIndex();
+    state.data = await loadDay(state.date);
+    await ensureIndexed(state.date);
+    setSyncStatus(navigator.onLine);
+    render();
+  }
+  init();
+})();
+</script>
+</body>
+</html>
