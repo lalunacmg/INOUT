@@ -27,14 +27,14 @@
     --amber:#B7791F;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);height:100%;overflow:hidden;
     font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     -webkit-font-smoothing:antialiased;}
   .mono{font-family:"SF Mono","Roboto Mono",ui-monospace,Menlo,Consolas,monospace; font-variant-numeric:tabular-nums;}
-  #app{max-width:900px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;}
+  #app{max-width:900px;margin:0 auto;height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden;}
 
-  header{position:sticky;top:0;z-index:20;background:rgba(243,244,246,0.86);backdrop-filter:blur(14px);
-    -webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:14px 16px 10px;}
+  header{flex:0 0 auto;z-index:20;background:rgba(243,244,246,0.86);backdrop-filter:blur(14px);
+    -webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding:clamp(8px,2vh,14px) 16px clamp(6px,1.4vh,10px);}
   .brand{display:flex;align-items:center;justify-content:space-between;}
   .brand-left{display:flex;align-items:center;gap:10px;}
   .logo{width:38px;height:38px;border-radius:10px;background:#000;
@@ -49,7 +49,8 @@
   .dot{width:6px;height:6px;border-radius:50%;background:var(--ok);}
   .dot.off{background:#C7C7CC;}
 
-  main{flex:1;padding:10px 8px 96px;display:flex;}
+  main{flex:1;min-height:0;padding:clamp(6px,1.6vh,10px) 8px;padding-bottom:calc(clamp(6px,1.6vh,10px) + 64px);
+    display:flex;overflow-y:auto;-webkit-overflow-scrolling:touch;}
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;align-items:stretch;}
   @media (max-width:340px){
     .grid{gap:6px;}
@@ -62,9 +63,9 @@
   }
 
   .card{background:var(--surface);border-radius:22px;overflow:hidden;box-shadow:0 1px 2px rgba(0,0,0,0.04),0 8px 24px rgba(0,0,0,0.06);
-    display:flex;flex-direction:column;border:1px solid rgba(0,0,0,0.03);width:100%;}
+    display:flex;flex-direction:column;border:1px solid rgba(0,0,0,0.03);width:100%;min-height:0;}
 
-  .emp-header{padding:20px 16px 16px;color:#fff;position:relative;}
+  .emp-header{padding:clamp(10px,2.4vh,20px) 16px clamp(8px,1.8vh,16px);color:#fff;position:relative;flex:0 0 auto;}
   .card.jhay .emp-header{background:linear-gradient(160deg,var(--jhay) 0%, var(--jhay-dark) 100%);}
   .card.bong .emp-header{background:linear-gradient(160deg,var(--bong) 0%, var(--bong-dark) 100%);}
   .emp-name{font-size:24px;font-weight:800;letter-spacing:-0.02em;}
@@ -72,10 +73,10 @@
   .status-pill{display:inline-block;margin-top:11px;padding:6px 13px;border-radius:100px;font-size:12.5px;font-weight:700;
     background:rgba(255,255,255,0.22);letter-spacing:0.01em;}
 
-  .body{padding:14px 12px 16px;display:flex;flex-direction:column;gap:12px;flex:1;}
+  .body{padding:clamp(8px,1.8vh,14px) 12px clamp(10px,2vh,16px);display:flex;flex-direction:column;gap:clamp(6px,1.4vh,12px);flex:1;min-height:0;}
 
-  .shift-row{display:flex;gap:9px;}
-  .shift-btn{flex:1;border:none;border-radius:16px;padding:15px 8px;font-size:15px;font-weight:800;cursor:pointer;
+  .shift-row{display:flex;gap:9px;flex:0 0 auto;}
+  .shift-btn{flex:1;border:none;border-radius:16px;padding:clamp(9px,1.8vh,15px) 8px;font-size:15px;font-weight:800;cursor:pointer;
     display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .08s ease, opacity .15s;}
   .shift-btn:active{transform:scale(0.96);}
   .shift-btn[disabled]{opacity:0.38;cursor:not-allowed;}
@@ -84,19 +85,22 @@
   .shift-out{background:#FDECEC;color:var(--danger);}
   .shift-time{font-size:12px;font-weight:700;opacity:0.8;}
 
-  .worked-box{background:var(--bg);border-radius:16px;padding:13px 14px;display:flex;justify-content:space-between;align-items:center;}
+  .worked-box{background:var(--bg);border-radius:16px;padding:clamp(8px,1.6vh,13px) 14px;display:flex;justify-content:space-between;align-items:center;flex:0 0 auto;}
   .worked-label{font-size:12px;color:var(--sub);font-weight:600;}
   .worked-val{font-size:20px;font-weight:800;}
 
-  .breaks{display:flex;flex-direction:column;gap:9px;flex:1;}
-  .brk{border:1px solid var(--line);border-radius:18px;padding:12px 13px;display:flex;align-items:center;gap:12px;}
+  .breaks{display:flex;flex-direction:column;gap:clamp(5px,1.2vh,9px);flex:1;min-height:0;}
+  .brk{border:1px solid var(--line);border-radius:18px;padding:clamp(8px,1.4vh,12px) 13px;display:flex;flex-direction:column;
+    justify-content:center;gap:clamp(6px,1.2vh,10px);flex:1;min-height:0;}
   .brk.active{border-color:transparent;}
   .card.jhay .brk.active{background:var(--jhay-tint);}
   .card.bong .brk.active{background:var(--bong-tint);}
   .brk.over{background:#FDECEC;}
 
-  .ring-wrap{position:relative;width:58px;height:58px;flex-shrink:0;}
-  .ring-wrap svg{transform:rotate(-90deg);width:58px;height:58px;}
+  .brk-top{display:flex;align-items:center;justify-content:center;gap:12px;flex:0 0 auto;}
+
+  .ring-wrap{position:relative;width:clamp(44px,7vh,58px);height:clamp(44px,7vh,58px);flex-shrink:0;}
+  .ring-wrap svg{transform:rotate(-90deg);width:100%;height:100%;}
   .ring-bg{fill:none;stroke:var(--line);stroke-width:5;}
   .ring-fg{fill:none;stroke-width:5;stroke-linecap:round;transition:stroke-dashoffset .3s linear;}
   .card.jhay .ring-fg{stroke:var(--jhay-ring);}
@@ -104,7 +108,7 @@
   .ring-fg.over{stroke:var(--danger);}
   .ring-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:19px;}
 
-  .brk-info{flex:1;min-width:0;}
+  .brk-info{flex:none;min-width:0;text-align:left;}
   .brk-name{font-size:14.5px;font-weight:700;}
   .brk-limit{font-size:11.5px;color:var(--sub);font-weight:600;}
   .brk-timer{font-size:19px;font-weight:800;margin-top:2px;}
@@ -113,12 +117,13 @@
     padding:2px 7px;border-radius:100px;margin-left:6px;vertical-align:2px;letter-spacing:0.02em;}
   .done-tag{display:inline-block;font-size:10px;font-weight:700;color:var(--ok);margin-left:5px;}
 
-  .brk-actions{display:flex;flex-direction:column;gap:6px;}
-  .brk-btn{border:none;border-radius:11px;padding:8px 12px;font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .brk-actions{display:flex;justify-content:center;gap:8px;flex:0 0 auto;}
+  .brk-btn{border:none;border-radius:12px;padding:10px 14px;font-size:12.5px;font-weight:700;cursor:pointer;white-space:nowrap;flex:1;max-width:160px;}
   .brk-btn:active{transform:scale(0.94);}
   .brk-btn[disabled]{opacity:0.3;cursor:not-allowed;}
   .card.jhay .brk-btn.start{background:var(--jhay);color:#fff;}
   .card.bong .brk-btn.start{background:var(--bong);color:#fff;}
+  .brk-btn.start{flex:none;width:100%;max-width:none;}
   .brk-btn.pause{background:#FFF1DC;color:var(--amber);}
   .brk-btn.end{background:#F1F1F3;color:var(--sub);}
 
@@ -333,6 +338,11 @@
     const h = Math.floor(sec/3600), m = Math.round((sec%3600)/60);
     return h+"h "+String(m).padStart(2,"0")+"m";
   }
+  function fmtWorkedLive(sec){
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec/3600), m = Math.floor((sec%3600)/60), s = sec%60;
+    return String(h).padStart(2,"0")+":"+String(m).padStart(2,"0")+":"+String(s).padStart(2,"0");
+  }
 
   function breakElapsed(b, now){
     let e = b.used;
@@ -436,30 +446,41 @@
         const frac = elapsed / bd.limit;
         const dash = ringDash(frac);
         const active = b.running;
-        const canStart = emp.login && !emp.logout && !anyBreakRunning(emp) && !b.ended;
-        const canPause = b.running;
-        const canEnd = b.running || (b.used > 0 && !b.ended);
+        const notYetStarted = !b.ended && b.used===0 && !b.running;
+        const canStart = notYetStarted && emp.login && !emp.logout && !anyBreakRunning(emp);
+        const canToggle = !b.ended && (b.running || b.used>0) && (b.running || !anyBreakRunning(emp));
+        const canEnd = !b.ended && (b.running || b.used>0);
+
+        let actionsHtml = "";
+        if(notYetStarted){
+          actionsHtml = `<div class="brk-actions">
+            <button class="brk-btn start" data-act="start" data-emp="${e.id}" data-key="${bd.key}" ${canStart?'':'disabled'}>START</button>
+          </div>`;
+        } else if(!b.ended){
+          actionsHtml = `<div class="brk-actions">
+            <button class="brk-btn pause" data-act="${active?'pause':'start'}" data-emp="${e.id}" data-key="${bd.key}" ${canToggle?'':'disabled'}>${active?'PAUSE':'RESUME'}</button>
+            <button class="brk-btn end" data-act="end" data-emp="${e.id}" data-key="${bd.key}" ${canEnd?'':'disabled'}>END</button>
+          </div>`;
+        }
 
         breaksHtml += `
         <div class="brk ${active?'active':''} ${over?'over':''}">
-          <div class="ring-wrap">
-            <svg width="42" height="42" viewBox="0 0 42 42">
-              <circle class="ring-bg" cx="21" cy="21" r="17"></circle>
-              <circle class="ring-fg ${over?'over':''}" cx="21" cy="21" r="17"
-                stroke-dasharray="${dash.circumference}" stroke-dashoffset="${dash.offset}"></circle>
-            </svg>
-            <div class="ring-icon">${b.ended? '✅' : (active? '⏱️':'☕')}</div>
+          <div class="brk-top">
+            <div class="ring-wrap">
+              <svg width="58" height="58" viewBox="0 0 42 42">
+                <circle class="ring-bg" cx="21" cy="21" r="17"></circle>
+                <circle class="ring-fg ${over?'over':''}" cx="21" cy="21" r="17"
+                  stroke-dasharray="${dash.circumference}" stroke-dashoffset="${dash.offset}"></circle>
+              </svg>
+              <div class="ring-icon">${b.ended? '✅' : (active? '⏱️':'☕')}</div>
+            </div>
+            <div class="brk-info">
+              <div class="brk-name">${bd.label} ${over? '<span class="over-tag">OVER</span>' : (b.ended? '<span class="done-tag">done</span>':'')}</div>
+              <div class="brk-limit">limit ${bd.limit/60}min</div>
+              <div class="brk-timer mono ${over?'over':''}">${fmtClock(elapsed)}</div>
+            </div>
           </div>
-          <div class="brk-info">
-            <div class="brk-name">${bd.label} ${over? '<span class="over-tag">OVER</span>' : (b.ended? '<span class="done-tag">done</span>':'')}</div>
-            <div class="brk-limit">limit ${bd.limit/60}min</div>
-            <div class="brk-timer mono ${over?'over':''}">${fmtClock(elapsed)}</div>
-          </div>
-          <div class="brk-actions">
-            <button class="brk-btn start" data-act="start" data-emp="${e.id}" data-key="${bd.key}" ${canStart?'':'disabled'}>${b.used>0 && !active ? 'RESUME':'START'}</button>
-            <button class="brk-btn pause" data-act="pause" data-emp="${e.id}" data-key="${bd.key}" ${canPause?'':'disabled'}>PAUSE</button>
-            <button class="brk-btn end" data-act="end" data-emp="${e.id}" data-key="${bd.key}" ${canEnd?'':'disabled'}>END</button>
-          </div>
+          ${actionsHtml}
         </div>`;
       });
 
@@ -482,7 +503,7 @@
           </div>
           <div class="worked-box">
             <div class="worked-label">Worked today (net of breaks)</div>
-            <div class="worked-val mono">${fmtHM(worked)}</div>
+            <div class="worked-val mono">${fmtWorkedLive(worked)}</div>
           </div>
           <div class="breaks">${breaksHtml}</div>
         </div>
