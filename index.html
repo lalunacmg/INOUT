@@ -247,7 +247,7 @@
 
   function todayKey(d){ d = d || new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
   function emptyDay(){
-    const day = {};
+    const day = { _v: 0 };
     EMP.forEach(e=>{
       day[e.id] = {
         login:null, logout:null,
@@ -301,13 +301,19 @@
     document.getElementById("syncText").textContent = ok ? "synced" : "offline";
   }
 
-  async function persist(){
+  async function persist(retryCount){
+    retryCount = retryCount || 0;
     saving = true;
     const ok = await saveDay(state.date, state.data);
     setSyncStatus(ok);
-    await ensureIndexed(state.date);
+    if(ok){ await ensureIndexed(state.date); }
     saving = false;
-    if(dirty){ dirty = false; persist(); }
+    if(dirty){
+      dirty = false;
+      persist();
+    } else if(!ok && retryCount < 5){
+      setTimeout(()=>persist(retryCount+1), 1500);
+    }
   }
   function queueSave(){
     if(saving){ dirty = true; return; }
@@ -316,8 +322,11 @@
 
   async function pollRemote(){
     // don't clobber if a local action just fired mid-save
-    if(saving) return;
+    if(saving || dirty) return;
     const remote = await loadDay(state.date);
+    if(!remote) return;
+    // never let a stale read overwrite a local change that hasn't propagated yet
+    if((remote._v||0) < (state.data._v||0)) return;
     state.data = remote;
     render();
   }
@@ -364,11 +373,12 @@
   }
 
   // ---------- Actions ----------
+  function bumpVersion(){ state.data._v = Date.now(); }
   async function login(empId){
     const emp = state.data[empId];
     if(emp.login) return;
     emp.login = new Date().toISOString();
-    render(); queueSave();
+    bumpVersion(); render(); queueSave();
   }
   async function logout(empId){
     const emp = state.data[empId];
@@ -378,7 +388,7 @@
       return;
     }
     emp.logout = new Date().toISOString();
-    render(); queueSave();
+    bumpVersion(); render(); queueSave();
   }
   async function startBreak(empId, key){
     const emp = state.data[empId];
@@ -389,7 +399,7 @@
     b.running = true;
     b.startedAt = new Date().toISOString();
     if(!b.firstStart) b.firstStart = b.startedAt;
-    render(); queueSave();
+    bumpVersion(); render(); queueSave();
   }
   async function pauseBreak(empId, key){
     const emp = state.data[empId];
@@ -398,7 +408,7 @@
     b.used += (Date.now() - new Date(b.startedAt).getTime())/1000;
     b.running = false;
     b.startedAt = null;
-    render(); queueSave();
+    bumpVersion(); render(); queueSave();
   }
   async function endBreak(empId, key){
     const emp = state.data[empId];
@@ -409,7 +419,7 @@
       b.startedAt = null;
     }
     b.ended = true;
-    render(); queueSave();
+    bumpVersion(); render(); queueSave();
   }
 
   // ---------- Rendering ----------
